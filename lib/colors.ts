@@ -36,19 +36,21 @@ export function getEntityColor(name: string): string {
 }
 
 // Maximally perceptually distinct palette for entities
+// Sorted alphabetically: Jacob→index 0, Luis→index 1, Patricia→index 2
+// Index 0 (indigo) and index 2 (red) are maximally distinct.
 const DISTINCT_PALETTE = [
-  "#6366f1", // indigo
-  "#f59e0b", // amber
-  "#10b981", // emerald
-  "#ef4444", // red
-  "#06b6d4", // cyan
-  "#f97316", // orange
-  "#8b5cf6", // violet
-  "#ec4899", // pink
-  "#14b8a6", // teal
-  "#84cc16", // lime
-  "#0ea5e9", // sky
-  "#a855f7", // purple
+  "#6366f1", // 0: indigo (Jacob)
+  "#f59e0b", // 1: amber (Luis)
+  "#ef4444", // 2: red (Patricia) ← changed from emerald to red for max contrast with indigo
+  "#10b981", // 3: emerald (Sin promotor)
+  "#06b6d4", // 4: cyan
+  "#f97316", // 5: orange
+  "#ec4899", // 6: pink
+  "#8b5cf6", // 7: violet
+  "#14b8a6", // 8: teal
+  "#84cc16", // 9: lime
+  "#0ea5e9", // 10: sky
+  "#a855f7", // 11: purple
 ];
 
 /**
@@ -68,6 +70,15 @@ export function buildColorMap(entities: string[]): Record<string, string> {
 // ─── Status colors ────────────────────────────────────────────────────────────
 /** Maps Spanish status labels to hex colors. */
 export const STATUS_COLORS: Record<string, string> = {
+  // Cotización statuses (Spanish mapped)
+  Registrada: "#3b82f6",   // blue
+  Convertida: "#16a34a",   // green
+  Rechazada:  "#dc2626",   // red
+  // Raw English statuses (fallback)
+  registered: "#3b82f6",
+  converted:  "#16a34a",
+  rejected:   "#dc2626",
+
   // Positive / completed
   Aprobada: "#16a34a",
   Vendida: "#16a34a",

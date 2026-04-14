@@ -14,22 +14,22 @@ export interface FunnelStage {
 interface FunnelVizProps {
   title: string;
   stages: FunnelStage[];
-  accentColor?: string;
 }
 
 export function FunnelViz({ title, stages }: FunnelVizProps) {
   const top = stages[0]?.value || 1;
 
   return (
-    <div className="space-y-3">
-      <h3 className="text-sm font-semibold text-slate-700 mb-4">{title}</h3>
+    <div className="space-y-1">
+      {title && <h3 className="text-sm font-semibold text-slate-700 mb-5">{title}</h3>}
 
       {/* Column headers */}
-      <div className="grid grid-cols-[auto_1fr_64px_64px] gap-x-4 items-center mb-1">
-        <div className="w-6" />
+      <div className="grid grid-cols-[28px_1fr_72px_80px_80px] gap-x-3 items-center mb-2 px-1">
         <div />
-        <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest text-right">vs total</p>
-        <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest text-right">vs ant.</p>
+        <div />
+        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest text-right">Total</p>
+        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest text-right">% del paso 1</p>
+        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest text-right">Conversión</p>
       </div>
 
       {stages.map((stage, i) => {
@@ -39,7 +39,7 @@ export function FunnelViz({ title, stages }: FunnelVizProps) {
           : null;
 
         return (
-          <div key={stage.label} className="grid grid-cols-[auto_1fr_64px_64px] gap-x-4 items-center">
+          <div key={stage.label} className="grid grid-cols-[28px_1fr_72px_80px_80px] gap-x-3 items-center py-1.5">
             {/* Step badge */}
             <div
               className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0"
@@ -48,39 +48,41 @@ export function FunnelViz({ title, stages }: FunnelVizProps) {
               {stage.step}
             </div>
 
-            {/* Bar + label */}
-            <div className="flex flex-col gap-1">
-              <div className="relative h-10 bg-slate-100 rounded-md overflow-hidden">
+            {/* Bar track + label below */}
+            <div className="flex flex-col gap-1.5 min-w-0">
+              <div className="relative h-8 bg-slate-100 rounded-lg overflow-hidden">
                 <div
-                  className="absolute inset-y-0 left-0 rounded-md flex items-center pl-3 transition-all duration-500"
-                  style={{ width: `${Math.max(pctOfTop, 2)}%`, background: stage.color, opacity: 0.85 }}
-                >
-                  <span className="text-white text-xs font-bold tabular-nums drop-shadow-sm">
-                    {fmtNumber(stage.value)}
-                  </span>
-                </div>
+                  className="absolute inset-y-0 left-0 rounded-lg transition-all duration-700"
+                  style={{ width: `${Math.max(pctOfTop, 1.5)}%`, background: stage.color, opacity: 0.8 }}
+                />
               </div>
               <div className="flex items-baseline gap-1.5">
-                <span className="text-[11px] font-medium text-slate-600">{stage.label}</span>
+                <span className="text-[11px] font-semibold text-slate-700 truncate">{stage.label}</span>
                 {stage.sublabel && (
-                  <span className="text-[10px] text-slate-400 italic">{stage.sublabel}</span>
+                  <span className="text-[10px] text-slate-400 italic truncate">{stage.sublabel}</span>
                 )}
               </div>
             </div>
 
-            {/* % vs total */}
-            <p className={cn(
-              "text-xs font-semibold tabular-nums text-right",
-              pctOfTop > 50 ? "text-emerald-600" : pctOfTop > 20 ? "text-amber-600" : "text-red-500"
-            )}>
-              {pctOfTop.toFixed(1)}%
+            {/* Absolute count — always visible */}
+            <p className="text-sm font-bold tabular-nums text-slate-800 text-right">
+              {fmtNumber(stage.value)}
             </p>
 
-            {/* % vs anterior */}
+            {/* % vs step 1 */}
             <p className={cn(
-              "text-xs tabular-nums text-right",
+              "text-xs font-semibold tabular-nums text-right",
+              i === 0 ? "text-slate-400" :
+              pctOfTop > 50 ? "text-emerald-600" : pctOfTop > 20 ? "text-amber-600" : "text-rose-500"
+            )}>
+              {i === 0 ? "—" : `${pctOfTop.toFixed(1)}%`}
+            </p>
+
+            {/* Conversion from previous step */}
+            <p className={cn(
+              "text-xs font-medium tabular-nums text-right",
               pctOfPrev === null ? "text-slate-300" :
-              pctOfPrev > 60 ? "text-emerald-600" : pctOfPrev > 30 ? "text-amber-600" : "text-red-500"
+              pctOfPrev > 60 ? "text-emerald-600" : pctOfPrev > 30 ? "text-amber-600" : "text-rose-500"
             )}>
               {pctOfPrev !== null ? `${pctOfPrev.toFixed(1)}%` : "—"}
             </p>

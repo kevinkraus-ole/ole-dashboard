@@ -110,6 +110,11 @@ export function CotizacionesTab({
     [data]
   );
 
+  const promotorColorMap = useMemo(
+    () => buildColorMap([...new Set(data.map(r => r.Promotor))]),
+    [data]
+  );
+
   // Status donut
   const statusData = useMemo(() => {
     const map = new Map<string, number>();
@@ -151,9 +156,9 @@ export function CotizacionesTab({
       .map(([nombre, cantidad]) => ({
         nombre,
         cantidad,
-        color: getEntityColor(nombre),
+        color: promotorColorMap[nombre] ?? getEntityColor(nombre),
       }));
-  }, [filtered]);
+  }, [filtered, promotorColorMap]);
 
   // Table rows
   const tableRows = useMemo(() => {

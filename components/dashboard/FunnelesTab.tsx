@@ -41,20 +41,14 @@ export function FunnelesTab({
 }: FunnelesTabProps) {
   const [agenciaFilter, setAgenciaFilter] = useState("");
 
-  // Unique agencies (union of both datasets)
-  const agencias = useMemo(() => {
-    const all = new Set([
-      ...agentes.map((r) => r.Agencia_Master),
-      ...cotizaciones.map((r) => r.Agencia_Master),
-    ]);
-    return [...all].filter((a) => a !== "Sin agencia").sort();
-  }, [agentes, cotizaciones]);
+  // Unique promotores from cotizaciones (which uses promoter names)
+  const promotores = useMemo(() => {
+    const all = new Set(cotizaciones.map((r) => r.Agencia_Master).filter(Boolean));
+    return [...all].filter((a) => a !== 'Sin promotor').sort();
+  }, [cotizaciones]);
 
-  // Filtered rows
-  const filteredAgentes = useMemo(
-    () => agenciaFilter ? agentes.filter((r) => r.Agencia_Master === agenciaFilter) : agentes,
-    [agentes, agenciaFilter]
-  );
+  // Filtered rows — agentes is always global totals (single row), only filter cotizaciones
+  const filteredAgentes = agentes;
   const filteredCot = useMemo(
     () => agenciaFilter ? cotizaciones.filter((r) => r.Agencia_Master === agenciaFilter) : cotizaciones,
     [cotizaciones, agenciaFilter]
@@ -103,16 +97,20 @@ export function FunnelesTab({
           )}
         </div>
 
+        <div className="flex items-center gap-2 mr-4 border-r border-slate-200 pr-4">
+          <span className="text-[11px] font-semibold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md">Onshore México</span>
+        </div>
+
         <div className="flex flex-col gap-1">
-          <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Agencia Master</span>
+          <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Promotor</span>
           <Select value={agenciaFilter} onValueChange={(v) => setAgenciaFilter(v === ALL ? "" : (v ?? ""))}>
 
             <SelectTrigger className="h-8 w-52 text-sm bg-white border-slate-200 text-slate-700">
-              <SelectValue placeholder="Todas" />
+              <SelectValue placeholder="Todos" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={ALL} className="text-slate-500 italic">Todas</SelectItem>
-              {agencias.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
+              <SelectItem value={ALL} className="text-slate-500 italic">Todos</SelectItem>
+              {promotores.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
@@ -196,6 +194,9 @@ export function FunnelesTab({
             </CardHeader>
             <CardContent className="pt-5">
               <FunnelViz title="" stages={agenteStages} />
+              <p className="text-xs text-slate-400 italic mt-2 px-1">
+                * Pasos 1–2 provienen del flujo de invitación. Pasos 3–4 representan todos los asesores activos en producción (sistemas distintos, no comparables directamente).
+              </p>
             </CardContent>
           </Card>
 
@@ -234,7 +235,7 @@ export function FunnelesTab({
           <Card className="border border-slate-200 shadow-none rounded-xl">
             <CardHeader className="pb-2 border-b border-slate-100">
               <CardTitle className="text-sm font-semibold text-slate-800">
-                Detalle por Agencia Master
+                Detalle por Promotor
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
@@ -242,7 +243,7 @@ export function FunnelesTab({
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-slate-100">
-                      {["Agencia", "Invitados", "Aprobados", "% Apr.", "Con Cot.", "% Act.", "Con Ventas", "% Conv.", "Cot. Total", "→ Pólizas", "Vigentes"].map((h) => (
+                      {["Promotor", "Invitados", "Aprobados", "% Apr.", "Con Cot.", "% Act.", "Con Ventas", "% Conv.", "Cot. Total", "→ Pólizas", "Vigentes"].map((h) => (
                         <th key={h} className="px-4 py-3 text-[11px] font-semibold text-slate-400 uppercase tracking-widest text-right first:text-left whitespace-nowrap">
                           {h}
                         </th>

@@ -121,6 +121,11 @@ export function InvitacionesTab({
     [data]
   );
 
+  const promotorColorMap = useMemo(
+    () => buildColorMap([...new Set(data.map(r => r.Promotor))]),
+    [data]
+  );
+
   // Funnel por grupo
   const funnelData = useMemo(() => {
     const grupoMap = new Map<string, number>();
@@ -160,9 +165,9 @@ export function InvitacionesTab({
       .map(([nombre, cantidad]) => ({
         nombre,
         cantidad,
-        color: getEntityColor(nombre),
+        color: promotorColorMap[nombre] ?? getEntityColor(nombre),
       }));
-  }, [filtered]);
+  }, [filtered, promotorColorMap]);
 
   // Table rows
   const tableRows = useMemo(
@@ -294,6 +299,16 @@ export function InvitacionesTab({
                 { key: "Agente", label: "Agente" },
                 { key: "Estado_Label", label: "Estado" },
                 { key: "Estado_Grupo", label: "Grupo" },
+                {
+                  key: "Agencia_Superior",
+                  label: "Agencia Superior",
+                  format: (v) => String(v) || "—",
+                },
+                {
+                  key: "Nivel",
+                  label: "Nivel",
+                  format: (v) => String(v) || "—",
+                },
                 {
                   key: "Cantidad",
                   label: "Cantidad",

@@ -3,48 +3,29 @@ import { runQuery } from "@/lib/bigquery";
 
 // ─── Funnel de Agentes ──────────────────────────────────────────────────────
 // Invitados → Aprobados → Con cotizaciones → Con ventas (pólizas)
+// Single totals row — join by agency_name is unreliable since agency_name in
+// fact_onshore_mx_quotation_policies contains promoter names, not formal agency names.
 const SQL_AGENTES = `
-WITH invitados AS (
-  SELECT
-    COALESCE(Agencia_Master, 'Sin agencia') AS Agencia_Master,
-    COUNT(*)                                AS total_invitados,
-    COUNTIF(Estado = 'APPROVED')            AS aprobados
-  FROM \`olelifetech.gold_zone.vw_agents_request\`
-  GROUP BY 1
-),
-cotizadores AS (
-  SELECT
-    COALESCE(agency_name, 'Sin agencia') AS Agencia_Master,
-    COUNT(DISTINCT advisor_id)           AS agentes_con_cotizaciones
-  FROM \`olelifetech.gold_zone.fact_onshore_mx_quotation_policies\`
-  WHERE quotation_number IS NOT NULL
-  GROUP BY 1
-),
-vendedores AS (
-  SELECT
-    COALESCE(agency_name, 'Sin agencia') AS Agencia_Master,
-    COUNT(DISTINCT advisor_id)           AS agentes_con_ventas
-  FROM \`olelifetech.gold_zone.fact_onshore_mx_quotation_policies\`
-  WHERE policy_number IS NOT NULL
-  GROUP BY 1
-)
 SELECT
-  i.Agencia_Master,
-  i.total_invitados,
-  i.aprobados,
-  COALESCE(c.agentes_con_cotizaciones, 0) AS agentes_con_cotizaciones,
-  COALESCE(v.agentes_con_ventas, 0)       AS agentes_con_ventas
-FROM invitados i
-LEFT JOIN cotizadores c ON LOWER(TRIM(c.Agencia_Master)) = LOWER(TRIM(i.Agencia_Master))
-LEFT JOIN vendedores  v ON LOWER(TRIM(v.Agencia_Master)) = LOWER(TRIM(i.Agencia_Master))
-ORDER BY i.total_invitados DESC
+  'Total'                                                           AS Agencia_Master,
+  COUNT(*)                                                          AS total_invitados,
+  COUNTIF(Estado = 'APPROVED')                                      AS aprobados,
+  (SELECT COUNT(DISTINCT advisor_id)
+   FROM \`olelifetech.gold_zone.fact_onshore_mx_quotation_policies\`
+   WHERE quotation_number IS NOT NULL
+     AND advisor_id IS NOT NULL AND advisor_id != '')               AS agentes_con_cotizaciones,
+  (SELECT COUNT(DISTINCT advisor_id)
+   FROM \`olelifetech.gold_zone.fact_onshore_mx_quotation_policies\`
+   WHERE policy_number IS NOT NULL
+     AND advisor_id IS NOT NULL AND advisor_id != '')               AS agentes_con_ventas
+FROM \`olelifetech.gold_zone.vw_agents_request\`
 `;
 
 // ─── Funnel de Cotizaciones ─────────────────────────────────────────────────
 // Cotizaciones totales → únicas → en progreso (solicitud) → convertidas → pólizas vigentes
 const SQL_COTIZACIONES = `
 SELECT
-  COALESCE(agency_name, 'Sin agencia')                                     AS Agencia_Master,
+  COALESCE(NULLIF(TRIM(agency_name),''), 'Sin promotor')                    AS Agencia_Master,
   COUNT(DISTINCT quotation_number)                                          AS cotizaciones_totales,
   COUNT(DISTINCT CASE WHEN quotation_status IS NOT NULL THEN quotation_number END) AS cotizaciones_con_estado,
   COUNT(DISTINCT policy_number)                                             AS convertidas_poliza,

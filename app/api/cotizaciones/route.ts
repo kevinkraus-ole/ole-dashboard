@@ -8,7 +8,12 @@ SELECT
   COALESCE(o.agency_name, 'Sin agencia')       AS Agencia_Master,
   COALESCE(o.promoter_name, 'Sin promotor')    AS Promotor,
   COALESCE(o.advisor_name, 'Sin agente')       AS Agente,
-  COALESCE(o.quotation_status, 'Sin estado')   AS Estado,
+  CASE o.quotation_status
+    WHEN 'registered' THEN 'Registrada'
+    WHEN 'converted'  THEN 'Convertida'
+    WHEN 'rejected'   THEN 'Rechazada'
+    ELSE COALESCE(o.quotation_status, 'Sin estado')
+  END AS Estado,
   COUNT(o.quotation_number)                    AS Cantidad_Cotizaciones
 FROM \`olelifetech.gold_zone.fact_onshore_mx_quotation_policies\` o
 WHERE o.quotation_date IS NOT NULL

@@ -150,6 +150,11 @@ export function PolizasTab({
     [data]
   );
 
+  const promotorColorMap = useMemo(
+    () => buildColorMap([...new Set(data.map(r => r.Promotor))]),
+    [data]
+  );
+
   // Status donut
   const statusData = useMemo(() => {
     const map = new Map<string, number>();
@@ -188,8 +193,8 @@ export function PolizasTab({
     }
     return [...map.entries()]
       .sort(([, a], [, b]) => b - a)
-      .map(([nombre, cantidad]) => ({ nombre, cantidad, color: getEntityColor(nombre) }));
-  }, [filtered]);
+      .map(([nombre, cantidad]) => ({ nombre, cantidad, color: promotorColorMap[nombre] ?? getEntityColor(nombre) }));
+  }, [filtered, promotorColorMap]);
 
   // Table rows
   const tableRows = useMemo(

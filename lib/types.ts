@@ -5,6 +5,9 @@ export interface InvitacionRow {
   Agente: string;
   Estado_Label: string;
   Estado_Grupo: string;
+  Posicion: string;
+  Nivel: string;
+  Agencia_Superior: string;
   Cantidad: number;
 }
 

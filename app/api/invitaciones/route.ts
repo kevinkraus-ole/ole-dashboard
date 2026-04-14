@@ -32,6 +32,9 @@ SELECT
     WHEN 'EXPIRED'             THEN 'Perdida'
     ELSE 'Otro'
   END AS Estado_Grupo,
+  MAX(COALESCE(r.Posicion, '')) AS Posicion,
+  MAX(COALESCE(r.Nivel, '')) AS Nivel,
+  MAX(COALESCE(r.Agencia_Superior, '')) AS Agencia_Superior,
   COUNT(*) AS Cantidad
 FROM \`olelifetech.gold_zone.vw_agents_request\` r
 WHERE r.F_Invitacion IS NOT NULL

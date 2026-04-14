@@ -16,6 +16,7 @@ import {
 } from "@/lib/types";
 import type { AgenteFunnelRow, CotizacionFunnelRow } from "@/app/api/funneles/route";
 import { FileText, Mail, ShieldCheck, AlertTriangle, GitMerge } from "lucide-react";
+import { cacheGet, cacheSet } from "@/lib/cache";
 
 const EMPTY_FILTERS: FilterState = { agenciaMaster: "", promotor: "", agente: "" };
 
@@ -81,11 +82,22 @@ export default function Home() {
   const [funLoading, setFunLoading] = useState(false);
   const [funError, setFunError] = useState<string>();
 
-  const loadCotizaciones = useCallback(async () => {
+  const loadCotizaciones = useCallback(async (force = false) => {
     setCotLoading(true);
     setCotError(undefined);
     try {
+      if (!force) {
+        const cached = cacheGet<{ data: CotizacionRow[]; lastUpdated: string; error?: string }>('cotizaciones');
+        if (cached) {
+          setCotData(cached.data);
+          setCotUpdated(cached.lastUpdated);
+          if (cached.error) setCotError(cached.error);
+          setCotLoading(false);
+          return;
+        }
+      }
       const res = await fetchData<CotizacionRow>("/api/cotizaciones");
+      cacheSet('cotizaciones', res);
       setCotData(res.data);
       setCotUpdated(res.lastUpdated);
       if (res.error) setCotError(res.error);
@@ -93,11 +105,22 @@ export default function Home() {
     finally { setCotLoading(false); }
   }, []);
 
-  const loadInvitaciones = useCallback(async () => {
+  const loadInvitaciones = useCallback(async (force = false) => {
     setInvLoading(true);
     setInvError(undefined);
     try {
+      if (!force) {
+        const cached = cacheGet<{ data: InvitacionRow[]; lastUpdated: string; error?: string }>('invitaciones');
+        if (cached) {
+          setInvData(cached.data);
+          setInvUpdated(cached.lastUpdated);
+          if (cached.error) setInvError(cached.error);
+          setInvLoading(false);
+          return;
+        }
+      }
       const res = await fetchData<InvitacionRow>("/api/invitaciones");
+      cacheSet('invitaciones', res);
       setInvData(res.data);
       setInvUpdated(res.lastUpdated);
       if (res.error) setInvError(res.error);
@@ -105,11 +128,22 @@ export default function Home() {
     finally { setInvLoading(false); }
   }, []);
 
-  const loadPolizas = useCallback(async () => {
+  const loadPolizas = useCallback(async (force = false) => {
     setPolLoading(true);
     setPolError(undefined);
     try {
+      if (!force) {
+        const cached = cacheGet<{ data: PolizaRow[]; lastUpdated: string; error?: string }>('polizas');
+        if (cached) {
+          setPolData(cached.data);
+          setPolUpdated(cached.lastUpdated);
+          if (cached.error) setPolError(cached.error);
+          setPolLoading(false);
+          return;
+        }
+      }
       const res = await fetchData<PolizaRow>("/api/polizas");
+      cacheSet('polizas', res);
       setPolData(res.data);
       setPolUpdated(res.lastUpdated);
       if (res.error) setPolError(res.error);
@@ -117,13 +151,25 @@ export default function Home() {
     finally { setPolLoading(false); }
   }, []);
 
-  const loadFunneles = useCallback(async () => {
+  const loadFunneles = useCallback(async (force = false) => {
     setFunLoading(true);
     setFunError(undefined);
     try {
+      if (!force) {
+        const cached = cacheGet<{ agentes: AgenteFunnelRow[]; cotizaciones: CotizacionFunnelRow[]; lastUpdated: string; error?: string }>('funneles');
+        if (cached) {
+          setFunAgentes(cached.agentes ?? []);
+          setFunCot(cached.cotizaciones ?? []);
+          setFunUpdated(cached.lastUpdated);
+          if (cached.error) setFunError(cached.error);
+          setFunLoading(false);
+          return;
+        }
+      }
       const res = await fetch("/api/funneles", { cache: "no-store" });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
+      cacheSet('funneles', json);
       setFunAgentes(json.agentes ?? []);
       setFunCot(json.cotizaciones ?? []);
       setFunUpdated(json.lastUpdated);
@@ -187,7 +233,7 @@ export default function Home() {
         {cotLoading && !cotData.length
           ? <LoadingSkeleton />
           : <CotizacionesTab data={cotData} filters={cotFilters} onFilterChange={setCotFilters}
-              lastUpdated={cotUpdated} isLoading={cotLoading} onRefresh={loadCotizaciones} />}
+              lastUpdated={cotUpdated} isLoading={cotLoading} onRefresh={() => loadCotizaciones(true)} />}
       </TabsContent>
 
       <TabsContent value="invitaciones" className="flex-1 mt-0 focus-visible:outline-none bg-white">
@@ -195,7 +241,7 @@ export default function Home() {
         {invLoading && !invData.length
           ? <LoadingSkeleton />
           : <InvitacionesTab data={invData} filters={invFilters} onFilterChange={setInvFilters}
-              lastUpdated={invUpdated} isLoading={invLoading} onRefresh={loadInvitaciones} />}
+              lastUpdated={invUpdated} isLoading={invLoading} onRefresh={() => loadInvitaciones(true)} />}
       </TabsContent>
 
       <TabsContent value="polizas" className="flex-1 mt-0 focus-visible:outline-none bg-white">
@@ -203,7 +249,7 @@ export default function Home() {
         {polLoading && !polData.length
           ? <LoadingSkeleton />
           : <PolizasTab data={polData} filters={polFilters} onFilterChange={setPolFilters}
-              lastUpdated={polUpdated} isLoading={polLoading} onRefresh={loadPolizas} />}
+              lastUpdated={polUpdated} isLoading={polLoading} onRefresh={() => loadPolizas(true)} />}
       </TabsContent>
 
       <TabsContent value="funneles" className="flex-1 mt-0 focus-visible:outline-none bg-white">
@@ -211,7 +257,7 @@ export default function Home() {
         {funLoading && !funAgentes.length
           ? <LoadingSkeleton />
           : <FunnelesTab agentes={funAgentes} cotizaciones={funCot}
-              lastUpdated={funUpdated} isLoading={funLoading} onRefresh={loadFunneles} />}
+              lastUpdated={funUpdated} isLoading={funLoading} onRefresh={() => loadFunneles(true)} />}
       </TabsContent>
     </Tabs>
   );
