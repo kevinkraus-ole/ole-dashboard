@@ -88,7 +88,7 @@ export function FunnelesTab({
   return (
     <div>
       {/* ── Filters ── */}
-      <div className="bg-white border-b border-slate-200 px-6 py-3 flex flex-wrap items-end gap-4">
+      <div className="bg-white border-b border-slate-200 px-6 py-3 flex flex-wrap items-end gap-4 sticky top-[52px] z-10">
         <div className="flex items-center gap-1.5 text-slate-400 self-end pb-1.5">
           <SlidersHorizontal size={13} />
           <span className="text-xs font-medium">Filtros</span>

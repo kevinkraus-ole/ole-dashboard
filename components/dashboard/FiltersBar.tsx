@@ -64,7 +64,7 @@ export function FiltersBar({
   const activeCount = [filters.agenciaMaster, filters.promotor, filters.agente].filter(Boolean).length;
 
   return (
-    <div className="bg-white border-b border-slate-100 px-8 py-3.5 flex flex-wrap items-end gap-4">
+    <div className="bg-white border-b border-slate-100 px-8 py-3.5 flex flex-wrap items-end gap-4 sticky top-[52px] z-10">
       {/* Filter icon + label */}
       <div className="flex items-center gap-1.5 text-slate-400 self-end pb-1.5">
         <SlidersHorizontal size={13} />

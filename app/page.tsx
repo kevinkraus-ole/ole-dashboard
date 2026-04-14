@@ -69,7 +69,7 @@ function TabStrip({ tabs, activeTab, onTabChange }: {
   onTabChange: (t: string) => void;
 }) {
   return (
-    <div className="bg-[#f7f8fa] border-b border-slate-200 px-8 shrink-0">
+    <div className="bg-[#f7f8fa] border-b border-slate-200 px-8 shrink-0 sticky top-0 z-10">
       <TabsList className="h-auto bg-transparent p-0 gap-1 items-end pt-2.5">
         {tabs.map(({ id, label, icon: Icon }) => (
           <TabsTrigger
