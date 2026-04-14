@@ -59,3 +59,37 @@ export interface IntlFunnelRow {
   Codigo: number;
   Cantidad: number;
 }
+
+export interface IntlPolizaRow {
+  Mes: string;
+  Agencia_Master: string;
+  Estado: string;
+  Estado_Pago: string;
+  Cantidad_Polizas: number;
+  Prima_Total: number;
+  Suma_Asegurada_Total: number;
+}
+
+export interface IntlVencimientoRow {
+  Numero: string;
+  Asegurado: string;
+  Asesor: string;
+  Agencia_Master: string;
+  Nivel2: string;
+  Nivel3: string;
+  Estado_Pago: string;
+  Prima_Anual: number;
+  Suma_Asegurada: number;
+  Fecha_Inicio: string;
+  Fecha_Vencimiento: string;
+  Anos_Poliza: number;
+  Dias_Para_Vencer: number;
+}
+
+export interface IntlConversionFunnel {
+  cotizaciones_totales: number;
+  avanzaron_proceso: number;
+  en_vigor: number;
+  polizas_activas: number;
+  activas_pagadas: number;
+}

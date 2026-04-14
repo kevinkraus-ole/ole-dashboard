@@ -14,6 +14,7 @@ interface EvolutivoChartProps {
   entities: string[];
   height?: number;
   colorMap?: Record<string, string>;
+  className?: string;
 }
 
 function fmtMes(val: string) {
@@ -48,10 +49,10 @@ const Tooltip_ = ({ active, payload, label }: any) => {
   );
 };
 
-export function EvolutivoChart({ data, entities, height = 320, colorMap }: EvolutivoChartProps) {
+export function EvolutivoChart({ data, entities, height = 320, colorMap, className }: EvolutivoChartProps) {
   if (!data.length) {
     return (
-      <div className="flex items-center justify-center text-slate-400 text-sm" style={{ height }}>
+      <div className="flex items-center justify-center text-slate-400 text-sm h-[200px]">
         Sin datos para mostrar
       </div>
     );
@@ -63,7 +64,8 @@ export function EvolutivoChart({ data, entities, height = 320, colorMap }: Evolu
   }));
 
   return (
-    <ResponsiveContainer width="100%" height={height}>
+    <div className={className ?? "w-full h-[200px] sm:h-[260px] md:h-[320px]"} style={className ? undefined : { height: undefined }}>
+    <ResponsiveContainer width="100%" height="100%">
       <ComposedChart data={enriched} margin={{ top: 8, right: 20, left: 0, bottom: 0 }} barCategoryGap="40%" barGap={4}>
         <CartesianGrid strokeDasharray="4 4" stroke="#f1f5f9" vertical={false} />
         <XAxis
@@ -109,5 +111,6 @@ export function EvolutivoChart({ data, entities, height = 320, colorMap }: Evolu
         />
       </ComposedChart>
     </ResponsiveContainer>
+    </div>
   );
 }

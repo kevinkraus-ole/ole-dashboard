@@ -7,6 +7,9 @@ import { InvitacionesTab } from "@/components/dashboard/InvitacionesTab";
 import { PolizasTab } from "@/components/dashboard/PolizasTab";
 import { FunnelesTab } from "@/components/dashboard/FunnelesTab";
 import { InternacionalTab } from "@/components/dashboard/InternacionalTab";
+import { IntlPolizasTab } from "@/components/dashboard/IntlPolizasTab";
+import { IntlVencimientosTab } from "@/components/dashboard/IntlVencimientosTab";
+import { IntlFunnelesTab } from "@/components/dashboard/IntlFunnelesTab";
 import { Sidebar, type Region } from "@/components/dashboard/Sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -17,10 +20,14 @@ import {
   ApiResponse,
   IntlCotizacionRow,
   IntlFunnelRow,
+  IntlPolizaRow,
+  IntlVencimientoRow,
+  IntlConversionFunnel,
 } from "@/lib/types";
 import type { AgenteFunnelRow, CotizacionFunnelRow } from "@/app/api/funneles/route";
 import type { IntlAgenciaRow, IntlComisionRow } from "@/app/api/intl/funneles/route";
-import { FileText, Mail, ShieldCheck, AlertTriangle, GitMerge } from "lucide-react";
+import type { VencimientoSummary } from "@/app/api/intl/vencimientos/route";
+import { FileText, Mail, ShieldCheck, AlertTriangle, GitMerge, Clock } from "lucide-react";
 import { cacheGet, cacheSet } from "@/lib/cache";
 
 const EMPTY_FILTERS: FilterState = { agenciaMaster: "", promotor: "", agente: "" };
@@ -328,79 +335,163 @@ function BrContent() {
 
 // ─── Internacional Content ────────────────────────────────────────────────────
 function IntlContent() {
-  const [cotData, setCotData] = useState<IntlCotizacionRow[]>([]);
-  const [funnelData, setFunnelData] = useState<IntlFunnelRow[]>([]);
-  const [agenciasData, setAgenciasData] = useState<IntlAgenciaRow[]>([]);
-  const [comisionesData, setComisionesData] = useState<IntlComisionRow[]>([]);
-  const [lastUpdated, setLastUpdated] = useState<string>();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string>();
+  const [activeTab, setActiveTab] = useState("cotizaciones");
 
-  const load = useCallback(async (force = false) => {
-    setIsLoading(true); setError(undefined);
+  // Cotizaciones
+  const [cotData, setCotData] = useState<IntlCotizacionRow[]>([]);
+  const [cotAgencias, setCotAgencias] = useState<IntlAgenciaRow[]>([]);
+  const [cotComisiones, setCotComisiones] = useState<IntlComisionRow[]>([]);
+  const [cotUpdated, setCotUpdated] = useState<string>();
+  const [cotLoading, setCotLoading] = useState(false);
+  const [cotError, setCotError] = useState<string>();
+
+  // Pólizas
+  const [polData, setPolData] = useState<IntlPolizaRow[]>([]);
+  const [polUpdated, setPolUpdated] = useState<string>();
+  const [polLoading, setPolLoading] = useState(false);
+  const [polError, setPolError] = useState<string>();
+
+  // Vencimientos
+  const [vencRows, setVencRows] = useState<IntlVencimientoRow[]>([]);
+  const [vencSummary, setVencSummary] = useState<VencimientoSummary | null>(null);
+  const [vencUpdated, setVencUpdated] = useState<string>();
+  const [vencLoading, setVencLoading] = useState(false);
+  const [vencError, setVencError] = useState<string>();
+
+  // Funneles
+  const [funStages, setFunStages] = useState<IntlFunnelRow[]>([]);
+  const [funConversion, setFunConversion] = useState<IntlConversionFunnel | null>(null);
+  const [funAgencias, setFunAgencias] = useState<IntlAgenciaRow[]>([]);
+  const [funComisiones, setFunComisiones] = useState<IntlComisionRow[]>([]);
+  const [funUpdated, setFunUpdated] = useState<string>();
+  const [funLoading, setFunLoading] = useState(false);
+  const [funError, setFunError] = useState<string>();
+
+  const loadCotizaciones = useCallback(async (force = false) => {
+    setCotLoading(true); setCotError(undefined);
     try {
+      type CachedCot = { cotizaciones: IntlCotizacionRow[]; agencias: IntlAgenciaRow[]; comisiones: IntlComisionRow[]; lastUpdated: string; error?: string };
       if (!force) {
-        const c = cacheGet<{
-          cotizaciones: IntlCotizacionRow[];
-          funnel: IntlFunnelRow[];
-          agencias: IntlAgenciaRow[];
-          comisiones: IntlComisionRow[];
-          lastUpdated: string;
-          error?: string;
-        }>("intl:all");
-        if (c) {
-          setCotData(c.cotizaciones ?? []); setFunnelData(c.funnel ?? []);
-          setAgenciasData(c.agencias ?? []); setComisionesData(c.comisiones ?? []);
-          setLastUpdated(c.lastUpdated); if (c.error) setError(c.error);
-          setIsLoading(false); return;
-        }
+        const c = cacheGet<CachedCot>("intl:cot");
+        if (c) { setCotData(c.cotizaciones ?? []); setCotAgencias(c.agencias ?? []); setCotComisiones(c.comisiones ?? []); setCotUpdated(c.lastUpdated); if (c.error) setCotError(c.error); setCotLoading(false); return; }
       }
       const [cotRes, funnelRes] = await Promise.all([
         fetchData<IntlCotizacionRow>("/api/intl/cotizaciones"),
         fetch("/api/intl/funneles", { cache: "no-store" }).then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }),
       ]);
-      const combined = {
-        cotizaciones: cotRes.data,
-        funnel: funnelRes.funnel ?? [],
-        agencias: funnelRes.agencias ?? [],
-        comisiones: funnelRes.comisiones ?? [],
-        lastUpdated: new Date().toISOString(),
-        error: cotRes.error ?? funnelRes.error,
-      };
-      cacheSet("intl:all", combined);
-      setCotData(combined.cotizaciones); setFunnelData(combined.funnel);
-      setAgenciasData(combined.agencias); setComisionesData(combined.comisiones);
-      setLastUpdated(combined.lastUpdated); if (combined.error) setError(combined.error);
-    } catch (e) { setError(String(e)); }
-    finally { setIsLoading(false); }
+      const payload: CachedCot = { cotizaciones: cotRes.data, agencias: funnelRes.agencias ?? [], comisiones: funnelRes.comisiones ?? [], lastUpdated: new Date().toISOString(), error: cotRes.error };
+      cacheSet("intl:cot", payload);
+      setCotData(payload.cotizaciones); setCotAgencias(payload.agencias); setCotComisiones(payload.comisiones); setCotUpdated(payload.lastUpdated); if (payload.error) setCotError(payload.error);
+    } catch (e) { setCotError(String(e)); }
+    finally { setCotLoading(false); }
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  const loadPolizas = useCallback(async (force = false) => {
+    setPolLoading(true); setPolError(undefined);
+    try {
+      if (!force) {
+        const c = cacheGet<ApiResponse<IntlPolizaRow>>("intl:polizas");
+        if (c) { setPolData(c.data); setPolUpdated(c.lastUpdated); if (c.error) setPolError(c.error); setPolLoading(false); return; }
+      }
+      const res = await fetchData<IntlPolizaRow>("/api/intl/polizas");
+      cacheSet("intl:polizas", res);
+      setPolData(res.data); setPolUpdated(res.lastUpdated); if (res.error) setPolError(res.error);
+    } catch (e) { setPolError(String(e)); }
+    finally { setPolLoading(false); }
+  }, []);
+
+  const loadVencimientos = useCallback(async (force = false) => {
+    setVencLoading(true); setVencError(undefined);
+    try {
+      type CachedVenc = { rows: IntlVencimientoRow[]; summary: VencimientoSummary; lastUpdated: string; error?: string };
+      if (!force) {
+        const c = cacheGet<CachedVenc>("intl:venc");
+        if (c) { setVencRows(c.rows ?? []); setVencSummary(c.summary); setVencUpdated(c.lastUpdated); if (c.error) setVencError(c.error); setVencLoading(false); return; }
+      }
+      const res = await fetch("/api/intl/vencimientos", { cache: "no-store" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json: CachedVenc = await res.json();
+      cacheSet("intl:venc", json);
+      setVencRows(json.rows ?? []); setVencSummary(json.summary); setVencUpdated(json.lastUpdated); if (json.error) setVencError(json.error);
+    } catch (e) { setVencError(String(e)); }
+    finally { setVencLoading(false); }
+  }, []);
+
+  const loadFunneles = useCallback(async (force = false) => {
+    setFunLoading(true); setFunError(undefined);
+    try {
+      type CachedFun = { funnel: IntlFunnelRow[]; conversion: IntlConversionFunnel; agencias: IntlAgenciaRow[]; comisiones: IntlComisionRow[]; lastUpdated: string; error?: string };
+      if (!force) {
+        const c = cacheGet<CachedFun>("intl:funneles");
+        if (c) { setFunStages(c.funnel ?? []); setFunConversion(c.conversion); setFunAgencias(c.agencias ?? []); setFunComisiones(c.comisiones ?? []); setFunUpdated(c.lastUpdated); if (c.error) setFunError(c.error); setFunLoading(false); return; }
+      }
+      const res = await fetch("/api/intl/funneles", { cache: "no-store" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json: CachedFun = await res.json();
+      cacheSet("intl:funneles", json);
+      setFunStages(json.funnel ?? []); setFunConversion(json.conversion); setFunAgencias(json.agencias ?? []); setFunComisiones(json.comisiones ?? []); setFunUpdated(json.lastUpdated); if (json.error) setFunError(json.error);
+    } catch (e) { setFunError(String(e)); }
+    finally { setFunLoading(false); }
+  }, []);
+
+  useEffect(() => {
+    loadCotizaciones(); loadPolizas(); loadVencimientos(); loadFunneles();
+  }, [loadCotizaciones, loadPolizas, loadVencimientos, loadFunneles]);
+
+  const tabs: TabDef[] = [
+    { id: "cotizaciones", label: "Cotizaciones", icon: FileText },
+    { id: "polizas",      label: "Pólizas",      icon: ShieldCheck },
+    { id: "vencimientos", label: "A Vencer",      icon: Clock },
+    { id: "funneles",     label: "Funneles",      icon: GitMerge },
+  ];
 
   return (
-    <div className="flex flex-col flex-1 bg-white">
-      {error && <ErrorBanner message={error} />}
-      {isLoading && !cotData.length ? <LoadingSkeleton /> :
-        <InternacionalTab
-          cotizaciones={cotData}
-          funnel={funnelData}
-          agencias={agenciasData}
-          comisiones={comisionesData}
-          lastUpdated={lastUpdated}
-          isLoading={isLoading}
-          onRefresh={() => load(true)}
-        />}
-    </div>
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1">
+      <TabStrip tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+
+      <TabsContent value="cotizaciones" className="flex-1 mt-0 focus-visible:outline-none bg-white">
+        {cotError && <ErrorBanner message={cotError} />}
+        {cotLoading && !cotData.length ? <LoadingSkeleton /> :
+          <InternacionalTab
+            cotizaciones={cotData} funnel={[]} agencias={cotAgencias} comisiones={cotComisiones}
+            lastUpdated={cotUpdated} isLoading={cotLoading} onRefresh={() => loadCotizaciones(true)}
+          />}
+      </TabsContent>
+
+      <TabsContent value="polizas" className="flex-1 mt-0 focus-visible:outline-none bg-white">
+        {polError && <ErrorBanner message={polError} />}
+        {polLoading && !polData.length ? <LoadingSkeleton /> :
+          <IntlPolizasTab data={polData} lastUpdated={polUpdated} isLoading={polLoading} onRefresh={() => loadPolizas(true)} />}
+      </TabsContent>
+
+      <TabsContent value="vencimientos" className="flex-1 mt-0 focus-visible:outline-none bg-white">
+        {vencError && <ErrorBanner message={vencError} />}
+        {vencLoading && !vencRows.length ? <LoadingSkeleton /> :
+          <IntlVencimientosTab rows={vencRows} summary={vencSummary} lastUpdated={vencUpdated} isLoading={vencLoading} onRefresh={() => loadVencimientos(true)} />}
+      </TabsContent>
+
+      <TabsContent value="funneles" className="flex-1 mt-0 focus-visible:outline-none bg-white">
+        {funError && <ErrorBanner message={funError} />}
+        {funLoading && !funStages.length ? <LoadingSkeleton /> :
+          <IntlFunnelesTab funnel={funStages} conversion={funConversion} agencias={funAgencias} comisiones={funComisiones} lastUpdated={funUpdated} isLoading={funLoading} onRefresh={() => loadFunneles(true)} />}
+      </TabsContent>
+    </Tabs>
   );
 }
 
 // ─── Root Page ────────────────────────────────────────────────────────────────
 export default function Home() {
   const [activeRegion, setActiveRegion] = useState<Region>("mx");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   return (
     <div className="flex flex-1 overflow-hidden">
-      <Sidebar activeRegion={activeRegion} onRegionChange={setActiveRegion} />
+      <Sidebar
+        activeRegion={activeRegion}
+        onRegionChange={setActiveRegion}
+        collapsed={sidebarCollapsed}
+        onToggle={() => setSidebarCollapsed((v) => !v)}
+      />
       <div className="flex-1 flex flex-col overflow-auto min-w-0">
         {activeRegion === "mx"   && <MxContent />}
         {activeRegion === "br"   && <BrContent />}

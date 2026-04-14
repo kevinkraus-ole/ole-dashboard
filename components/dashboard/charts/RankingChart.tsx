@@ -39,16 +39,19 @@ export function RankingChart({ data, color = "#6366f1", height = 280, label, top
 
   if (!top.length) {
     return (
-      <div className="flex items-center justify-center text-slate-300 text-sm" style={{ height }}>
+      <div className="flex items-center justify-center text-slate-300 text-sm h-[180px]">
         Sin datos
       </div>
     );
   }
 
+  const responsiveH = Math.min(height, Math.max(180, top.length * 32));
+
   return (
     <div>
       {label && <p className="text-xs text-slate-400 mb-4 font-medium">{label}</p>}
-      <ResponsiveContainer width="100%" height={height}>
+      <div className="w-full" style={{ height: responsiveH }}>
+      <ResponsiveContainer width="100%" height="100%">
         <BarChart data={top} layout="vertical" margin={{ top: 0, right: 64, left: 0, bottom: 0 }} barCategoryGap="35%">
           <CartesianGrid strokeDasharray="4 4" stroke="#f1f5f9" horizontal={false} />
           <XAxis
@@ -83,6 +86,7 @@ export function RankingChart({ data, color = "#6366f1", height = 280, label, top
           </Bar>
         </BarChart>
       </ResponsiveContainer>
+      </div>
     </div>
   );
 }

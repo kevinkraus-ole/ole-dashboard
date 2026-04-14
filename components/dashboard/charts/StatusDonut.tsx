@@ -43,7 +43,7 @@ const CenterLabel = ({ viewBox, total }: any) => {
 export function StatusDonut({ data, height = 260 }: StatusDonutProps) {
   if (!data.length) {
     return (
-      <div className="flex items-center justify-center text-slate-400 text-sm" style={{ height }}>
+      <div className="flex items-center justify-center text-slate-400 text-sm h-[200px]">
         Sin datos
       </div>
     );
@@ -52,7 +52,8 @@ export function StatusDonut({ data, height = 260 }: StatusDonutProps) {
   const enriched = data.map((d) => ({ ...d, __total__: total }));
 
   return (
-    <ResponsiveContainer width="100%" height={height}>
+    <div className="w-full h-[200px] sm:h-[240px] md:h-[280px]">
+    <ResponsiveContainer width="100%" height="100%">
       <PieChart>
         <Pie
           data={enriched}
@@ -75,5 +76,6 @@ export function StatusDonut({ data, height = 260 }: StatusDonutProps) {
         />
       </PieChart>
     </ResponsiveContainer>
+    </div>
   );
 }
