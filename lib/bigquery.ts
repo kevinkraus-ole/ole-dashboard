@@ -1,4 +1,5 @@
 import { BigQuery } from "@google-cloud/bigquery";
+import { GoogleAuth } from "google-auth-library";
 
 let client: BigQuery | null = null;
 
@@ -10,10 +11,20 @@ function getClient(): BigQuery {
     throw new Error("Missing GOOGLE_SERVICE_ACCOUNT_JSON env variable");
   }
 
+  const credentials = JSON.parse(credJson);
+
+  // GoogleAuth handles both service_account and authorized_user types
+  const auth = new GoogleAuth({
+    credentials,
+    scopes: ["https://www.googleapis.com/auth/bigquery"],
+    projectId: process.env.BIGQUERY_PROJECT_ID ?? "olelifetech",
+  });
+
   client = new BigQuery({
     projectId: process.env.BIGQUERY_PROJECT_ID ?? "olelifetech",
-    credentials: JSON.parse(credJson),
-  });
+    authClient: auth,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } as any);
 
   return client;
 }
@@ -22,7 +33,6 @@ function getClient(): BigQuery {
 function serializeValue(val: any): unknown {
   if (val === null || val === undefined) return null;
   if (typeof val === "bigint") return Number(val);
-  // BigQuery date/datetime/timestamp objects expose a .value string
   if (typeof val === "object" && "value" in val) return val.value;
   return val;
 }
