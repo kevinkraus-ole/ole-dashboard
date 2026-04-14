@@ -64,7 +64,7 @@ export function FiltersBar({
   const activeCount = [filters.agenciaMaster, filters.promotor, filters.agente].filter(Boolean).length;
 
   return (
-    <div className="bg-white border-b border-slate-200 px-6 py-3 flex flex-wrap items-end gap-4">
+    <div className="bg-white border-b border-slate-100 px-8 py-3.5 flex flex-wrap items-end gap-4">
       {/* Filter icon + label */}
       <div className="flex items-center gap-1.5 text-slate-400 self-end pb-1.5">
         <SlidersHorizontal size={13} />
@@ -125,7 +125,7 @@ export function FiltersBar({
         <Button
           size="sm"
           variant="outline"
-          className="h-8 gap-1.5 text-sm border-slate-200 text-slate-600 hover:bg-slate-50"
+          className="h-8 gap-1.5 text-sm bg-white border-slate-200 text-slate-700 hover:bg-slate-50 font-medium"
           onClick={onRefresh}
           disabled={isLoading}
         >

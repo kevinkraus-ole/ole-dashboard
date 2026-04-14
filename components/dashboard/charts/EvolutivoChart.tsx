@@ -13,6 +13,7 @@ interface EvolutivoChartProps {
   data: Record<string, string | number>[];
   entities: string[];
   height?: number;
+  colorMap?: Record<string, string>;
 }
 
 function fmtMes(val: string) {
@@ -47,7 +48,7 @@ const Tooltip_ = ({ active, payload, label }: any) => {
   );
 };
 
-export function EvolutivoChart({ data, entities, height = 320 }: EvolutivoChartProps) {
+export function EvolutivoChart({ data, entities, height = 320, colorMap }: EvolutivoChartProps) {
   if (!data.length) {
     return (
       <div className="flex items-center justify-center text-slate-400 text-sm" style={{ height }}>
@@ -63,7 +64,7 @@ export function EvolutivoChart({ data, entities, height = 320 }: EvolutivoChartP
 
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <ComposedChart data={enriched} margin={{ top: 8, right: 20, left: 0, bottom: 0 }}>
+      <ComposedChart data={enriched} margin={{ top: 8, right: 20, left: 0, bottom: 0 }} barCategoryGap="40%" barGap={4}>
         <CartesianGrid strokeDasharray="4 4" stroke="#f1f5f9" vertical={false} />
         <XAxis
           dataKey="mes"
@@ -91,8 +92,8 @@ export function EvolutivoChart({ data, entities, height = 320 }: EvolutivoChartP
             key={e}
             dataKey={e}
             stackId="s"
-            fill={getEntityColor(e)}
-            radius={i === entities.length - 1 ? [3, 3, 0, 0] : [0, 0, 0, 0]}
+            fill={colorMap?.[e] ?? getEntityColor(e)}
+            radius={i === entities.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
             maxBarSize={52}
           />
         ))}

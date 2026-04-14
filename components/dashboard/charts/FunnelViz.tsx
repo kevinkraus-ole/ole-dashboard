@@ -21,15 +21,15 @@ export function FunnelViz({ title, stages }: FunnelVizProps) {
   const top = stages[0]?.value || 1;
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-3">
       <h3 className="text-sm font-semibold text-slate-700 mb-4">{title}</h3>
 
       {/* Column headers */}
       <div className="grid grid-cols-[auto_1fr_64px_64px] gap-x-4 items-center mb-1">
         <div className="w-6" />
         <div />
-        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest text-right">vs total</p>
-        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest text-right">vs ant.</p>
+        <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest text-right">vs total</p>
+        <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest text-right">vs ant.</p>
       </div>
 
       {stages.map((stage, i) => {
@@ -42,7 +42,7 @@ export function FunnelViz({ title, stages }: FunnelVizProps) {
           <div key={stage.label} className="grid grid-cols-[auto_1fr_64px_64px] gap-x-4 items-center">
             {/* Step badge */}
             <div
-              className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0"
+              className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0"
               style={{ background: stage.color }}
             >
               {stage.step}
@@ -50,7 +50,7 @@ export function FunnelViz({ title, stages }: FunnelVizProps) {
 
             {/* Bar + label */}
             <div className="flex flex-col gap-1">
-              <div className="relative h-8 bg-slate-100 rounded-md overflow-hidden">
+              <div className="relative h-10 bg-slate-100 rounded-md overflow-hidden">
                 <div
                   className="absolute inset-y-0 left-0 rounded-md flex items-center pl-3 transition-all duration-500"
                   style={{ width: `${Math.max(pctOfTop, 2)}%`, background: stage.color, opacity: 0.85 }}

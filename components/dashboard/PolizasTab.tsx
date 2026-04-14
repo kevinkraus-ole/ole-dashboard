@@ -9,7 +9,7 @@ import { StatusDonut } from "./charts/StatusDonut";
 import { DataTable } from "./DataTable";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FiltersBar } from "./FiltersBar";
-import { STATUS_COLORS, getEntityColor } from "@/lib/colors";
+import { STATUS_COLORS, getEntityColor, buildColorMap } from "@/lib/colors";
 import { ShieldCheck, Building2, Users, DollarSign } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
@@ -145,6 +145,11 @@ export function PolizasTab({
     [filtered]
   );
 
+  const agencyColorMap = useMemo(
+    () => buildColorMap([...new Set(data.map((r) => r.Agencia_Master))]),
+    [data]
+  );
+
   // Status donut
   const statusData = useMemo(() => {
     const map = new Map<string, number>();
@@ -205,7 +210,7 @@ export function PolizasTab({
         onRefresh={onRefresh}
       />
 
-      <div className="p-6 space-y-6">
+      <div className="p-8 space-y-8 max-w-screen-2xl mx-auto">
         {/* KPIs */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <KpiCard
@@ -235,7 +240,7 @@ export function PolizasTab({
         </div>
 
         {/* Combo chart: cantidad + prima */}
-        <Card className="border-0 shadow-sm">
+        <Card className="border border-slate-100 shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.03)] rounded-2xl">
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold text-slate-800">
               Evolutivo de Pólizas por Agencia Master + Prima Total
@@ -246,6 +251,8 @@ export function PolizasTab({
               <ComposedChart
                 data={comboData}
                 margin={{ top: 4, right: 50, left: 0, bottom: 0 }}
+                barCategoryGap="40%"
+                barGap={4}
               >
                 <CartesianGrid
                   strokeDasharray="3 3"
@@ -287,10 +294,10 @@ export function PolizasTab({
                     yAxisId="left"
                     dataKey={a}
                     stackId="stack"
-                    fill={getEntityColor(a)}
+                    fill={agencyColorMap[a] ?? getEntityColor(a)}
                     radius={
                       agenciasInData[agenciasInData.length - 1] === a
-                        ? [3, 3, 0, 0]
+                        ? [4, 4, 0, 0]
                         : [0, 0, 0, 0]
                     }
                   />
@@ -312,7 +319,7 @@ export function PolizasTab({
 
         {/* Status donut + Ranking */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card className="border-0 shadow-sm">
+          <Card className="border border-slate-100 shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.03)] rounded-2xl">
             <CardHeader className="pb-2">
               <CardTitle className="text-base font-semibold text-slate-800">
                 Distribución por Estatus
@@ -323,7 +330,7 @@ export function PolizasTab({
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-sm">
+          <Card className="border border-slate-100 shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.03)] rounded-2xl">
             <CardHeader className="pb-2">
               <CardTitle className="text-base font-semibold text-slate-800">
                 Ranking por Agencia
@@ -340,7 +347,7 @@ export function PolizasTab({
         </div>
 
         {/* Promotores ranking */}
-        <Card className="border-0 shadow-sm">
+        <Card className="border border-slate-100 shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.03)] rounded-2xl">
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold text-slate-800">
               Top Promotores por Pólizas
@@ -356,7 +363,7 @@ export function PolizasTab({
         </Card>
 
         {/* Table */}
-        <Card className="border-0 shadow-sm">
+        <Card className="border border-slate-100 shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.03)] rounded-2xl">
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold text-slate-800">
               Detalle

@@ -9,7 +9,7 @@ import { StatusDonut } from "./charts/StatusDonut";
 import { DataTable } from "./DataTable";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FiltersBar } from "./FiltersBar";
-import { getEntityColor, STATUS_COLORS } from "@/lib/colors";
+import { getEntityColor, STATUS_COLORS, buildColorMap } from "@/lib/colors";
 import { FileText, Building2, Users, User } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
@@ -105,6 +105,11 @@ export function CotizacionesTab({
     [filtered]
   );
 
+  const agencyColorMap = useMemo(
+    () => buildColorMap([...new Set(data.map((r) => r.Agencia_Master))]),
+    [data]
+  );
+
   // Status donut
   const statusData = useMemo(() => {
     const map = new Map<string, number>();
@@ -177,7 +182,7 @@ export function CotizacionesTab({
         onRefresh={onRefresh}
       />
 
-      <div className="p-6 space-y-6">
+      <div className="p-8 space-y-8 max-w-screen-2xl mx-auto">
         {/* KPIs */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <KpiCard
@@ -207,7 +212,7 @@ export function CotizacionesTab({
         </div>
 
         {/* Evolutivo principal */}
-        <Card className="border-0 shadow-sm">
+        <Card className="border border-slate-100 shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.03)] rounded-2xl">
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold text-slate-800">
               Evolutivo de Cotizaciones por Agencia Master
@@ -218,13 +223,14 @@ export function CotizacionesTab({
               data={evolutivoData}
               entities={agenciasInData}
               height={340}
+              colorMap={agencyColorMap}
             />
           </CardContent>
         </Card>
 
         {/* Status + Ranking promotores */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card className="border-0 shadow-sm">
+          <Card className="border border-slate-100 shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.03)] rounded-2xl">
             <CardHeader className="pb-2">
               <CardTitle className="text-base font-semibold text-slate-800">
                 Distribución por Estado
@@ -235,7 +241,7 @@ export function CotizacionesTab({
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-sm">
+          <Card className="border border-slate-100 shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.03)] rounded-2xl">
             <CardHeader className="pb-2">
               <CardTitle className="text-base font-semibold text-slate-800">
                 Top Promotores
@@ -252,7 +258,7 @@ export function CotizacionesTab({
         </div>
 
         {/* Ranking agentes */}
-        <Card className="border-0 shadow-sm">
+        <Card className="border border-slate-100 shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.03)] rounded-2xl">
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold text-slate-800">
               Top Agentes por Cotizaciones
@@ -269,7 +275,7 @@ export function CotizacionesTab({
         </Card>
 
         {/* Table */}
-        <Card className="border-0 shadow-sm">
+        <Card className="border border-slate-100 shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.03)] rounded-2xl">
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold text-slate-800">
               Detalle

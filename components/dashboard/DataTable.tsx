@@ -43,7 +43,7 @@ export function DataTable({ columns, rows, maxRows = 100, className }: DataTable
   };
 
   return (
-    <div className={cn("overflow-x-auto", className)}>
+    <div className={cn("overflow-x-auto rounded-2xl overflow-hidden", className)}>
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-slate-100">
@@ -53,7 +53,7 @@ export function DataTable({ columns, rows, maxRows = 100, className }: DataTable
                 onClick={() => toggleSort(col.key)}
                 style={col.width ? { width: col.width } : undefined}
                 className={cn(
-                  "px-4 py-3 text-[11px] font-semibold text-slate-400 uppercase tracking-widest",
+                  "px-4 py-3.5 text-[11px] font-semibold text-slate-400 uppercase tracking-widest",
                   "select-none cursor-pointer whitespace-nowrap",
                   "hover:text-slate-600 transition-colors",
                   col.align === "right" ? "text-right" : col.align === "center" ? "text-center" : "text-left"
@@ -93,7 +93,7 @@ export function DataTable({ columns, rows, maxRows = 100, className }: DataTable
                     <td
                       key={col.key}
                       className={cn(
-                        "px-4 py-2.5 text-slate-700",
+                        "px-4 py-3.5 text-slate-700",
                         col.align === "right" ? "text-right tabular-nums" : col.align === "center" ? "text-center" : ""
                       )}
                     >

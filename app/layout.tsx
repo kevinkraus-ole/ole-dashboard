@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 
-const geist = Geist({ variable: "--font-geist", subsets: ["latin"] });
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Olé Life — Dashboard de Producción",
@@ -13,23 +18,22 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="es" className={`${geist.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col" style={{ background: "#f1f5f9" }}>
+    <html lang="es" className={`${inter.variable} h-full antialiased`}>
+      <body className="min-h-full flex flex-col bg-[#f7f8fa]">
         {/* ── Top navigation bar ── */}
-        <header className="h-14 bg-white border-b border-slate-200 flex items-center px-6 shrink-0">
-          {/* Brand */}
-          <div className="flex items-center gap-2.5">
+        <header className="h-14 bg-white border-b border-slate-100 flex items-center px-8 shrink-0 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+          <div className="flex items-center gap-3">
             <div
-              className="w-7 h-7 rounded-md flex items-center justify-center text-white text-[11px] font-bold tracking-tight shrink-0"
+              className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-[11px] font-bold tracking-tight shrink-0"
               style={{ background: "linear-gradient(135deg,#6366f1,#8b5cf6)" }}
             >
               OL
             </div>
             <div className="flex flex-col leading-none">
-              <span className="text-sm font-semibold text-slate-800 leading-tight">
+              <span className="text-[15px] font-semibold text-slate-900 leading-tight">
                 Olé Life
               </span>
-              <span className="text-[10px] text-slate-400 leading-tight tracking-wide uppercase">
+              <span className="text-[10px] text-slate-400 leading-tight tracking-widest uppercase mt-0.5">
                 Dashboard de Producción
               </span>
             </div>
@@ -37,8 +41,7 @@ export default function RootLayout({
 
           <div className="flex-1" />
 
-          {/* Right info */}
-          <span className="text-xs text-slate-400 font-mono">
+          <span className="text-xs text-slate-400 font-mono bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-100">
             olelifetech · gold_zone
           </span>
         </header>

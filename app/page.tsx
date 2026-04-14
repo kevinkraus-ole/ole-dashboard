@@ -153,21 +153,25 @@ export default function Home() {
       className="flex flex-col flex-1"
     >
       {/* ── Tab strip ── */}
-      <div className="bg-white border-b border-slate-200 px-6 shrink-0">
-        <TabsList className="h-11 bg-transparent p-0 gap-0">
+      <div className="bg-[#f7f8fa] border-b border-slate-200 px-8 shrink-0">
+        <TabsList className="h-auto bg-transparent p-0 gap-1 items-end pt-2.5">
           {tabs.map(({ id, label, icon: Icon }) => (
             <TabsTrigger
               key={id}
               value={id}
               className="
-                relative h-11 px-4 rounded-none bg-transparent
-                text-sm font-medium text-slate-500
-                border-b-2 border-transparent
-                data-[state=active]:border-indigo-500
-                data-[state=active]:text-indigo-600
-                data-[state=active]:bg-transparent
-                hover:text-slate-700
-                transition-colors gap-2
+                relative h-10 px-5 rounded-t-xl
+                bg-slate-200/60 border border-slate-200 border-b-0
+                text-sm font-medium text-slate-400
+                -mb-px
+                data-[state=active]:bg-white
+                data-[state=active]:text-slate-800
+                data-[state=active]:font-semibold
+                data-[state=active]:border-slate-200
+                data-[state=active]:shadow-[0_-2px_8px_rgba(0,0,0,0.05)]
+                hover:text-slate-600 hover:bg-slate-100
+                transition-all duration-150
+                gap-2
               "
             >
               <Icon size={14} />
@@ -178,7 +182,7 @@ export default function Home() {
       </div>
 
       {/* ── Content ── */}
-      <TabsContent value="cotizaciones" className="flex-1 mt-0 focus-visible:outline-none">
+      <TabsContent value="cotizaciones" className="flex-1 mt-0 focus-visible:outline-none bg-white">
         {cotError && <ErrorBanner message={cotError} />}
         {cotLoading && !cotData.length
           ? <LoadingSkeleton />
@@ -186,7 +190,7 @@ export default function Home() {
               lastUpdated={cotUpdated} isLoading={cotLoading} onRefresh={loadCotizaciones} />}
       </TabsContent>
 
-      <TabsContent value="invitaciones" className="flex-1 mt-0 focus-visible:outline-none">
+      <TabsContent value="invitaciones" className="flex-1 mt-0 focus-visible:outline-none bg-white">
         {invError && <ErrorBanner message={invError} />}
         {invLoading && !invData.length
           ? <LoadingSkeleton />
@@ -194,7 +198,7 @@ export default function Home() {
               lastUpdated={invUpdated} isLoading={invLoading} onRefresh={loadInvitaciones} />}
       </TabsContent>
 
-      <TabsContent value="polizas" className="flex-1 mt-0 focus-visible:outline-none">
+      <TabsContent value="polizas" className="flex-1 mt-0 focus-visible:outline-none bg-white">
         {polError && <ErrorBanner message={polError} />}
         {polLoading && !polData.length
           ? <LoadingSkeleton />
@@ -202,7 +206,7 @@ export default function Home() {
               lastUpdated={polUpdated} isLoading={polLoading} onRefresh={loadPolizas} />}
       </TabsContent>
 
-      <TabsContent value="funneles" className="flex-1 mt-0 focus-visible:outline-none">
+      <TabsContent value="funneles" className="flex-1 mt-0 focus-visible:outline-none bg-white">
         {funError && <ErrorBanner message={funError} />}
         {funLoading && !funAgentes.length
           ? <LoadingSkeleton />

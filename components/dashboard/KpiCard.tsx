@@ -12,12 +12,12 @@ interface KpiCardProps {
   className?: string;
 }
 
-const accents: Record<string, { bar: string; icon: string; iconText: string }> = {
-  indigo: { bar: "bg-indigo-500",  icon: "bg-indigo-50 text-indigo-600",  iconText: "text-indigo-600"  },
-  emerald:{ bar: "bg-emerald-500", icon: "bg-emerald-50 text-emerald-600",iconText: "text-emerald-600" },
-  amber:  { bar: "bg-amber-400",   icon: "bg-amber-50 text-amber-600",    iconText: "text-amber-600"   },
-  rose:   { bar: "bg-rose-500",    icon: "bg-rose-50 text-rose-600",      iconText: "text-rose-600"    },
-  slate:  { bar: "bg-slate-400",   icon: "bg-slate-100 text-slate-500",   iconText: "text-slate-500"   },
+const accents: Record<string, { icon: string }> = {
+  indigo:  { icon: "bg-indigo-50 text-indigo-600"   },
+  emerald: { icon: "bg-emerald-50 text-emerald-600" },
+  amber:   { icon: "bg-amber-50 text-amber-600"     },
+  rose:    { icon: "bg-rose-50 text-rose-600"       },
+  slate:   { icon: "bg-slate-100 text-slate-500"    },
 };
 
 export function KpiCard({ title, value, subtitle, icon: Icon, color = "slate", className }: KpiCardProps) {
@@ -25,29 +25,26 @@ export function KpiCard({ title, value, subtitle, icon: Icon, color = "slate", c
 
   return (
     <div className={cn(
-      "relative bg-white rounded-xl border border-slate-200 overflow-hidden flex",
+      "bg-white rounded-2xl border border-slate-100 p-6 flex flex-col gap-3",
+      "shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.03)]",
       className
     )}>
-      {/* Left accent bar */}
-      <div className={cn("w-1 shrink-0", a.bar)} />
-
-      <div className="flex-1 px-5 py-4 flex items-start justify-between gap-3 min-w-0">
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest leading-tight">
-            {title}
-          </p>
-          <p className="text-[28px] font-bold text-slate-800 leading-tight mt-1 tabular-nums">
-            {typeof value === "number" ? value.toLocaleString("es-MX") : value}
-          </p>
-          {subtitle && (
-            <p className="text-xs text-slate-400 mt-0.5 truncate">{subtitle}</p>
-          )}
-        </div>
-
+      <div className="flex items-start justify-between">
+        <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest leading-tight">
+          {title}
+        </p>
         {Icon && (
-          <div className={cn("p-2 rounded-lg shrink-0 mt-0.5", a.icon)}>
+          <div className={cn("p-2.5 rounded-xl shrink-0", a.icon)}>
             <Icon size={16} />
           </div>
+        )}
+      </div>
+      <div>
+        <p className="text-[30px] font-bold text-slate-900 leading-none tabular-nums">
+          {typeof value === "number" ? value.toLocaleString("es-MX") : value}
+        </p>
+        {subtitle && (
+          <p className="text-xs text-slate-400 mt-2 leading-relaxed">{subtitle}</p>
         )}
       </div>
     </div>

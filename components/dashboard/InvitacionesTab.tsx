@@ -10,7 +10,7 @@ import { ConversionFunnel } from "./charts/ConversionFunnel";
 import { DataTable } from "./DataTable";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FiltersBar } from "./FiltersBar";
-import { GRUPO_COLORS, STATUS_COLORS, getEntityColor } from "@/lib/colors";
+import { GRUPO_COLORS, STATUS_COLORS, getEntityColor, buildColorMap } from "@/lib/colors";
 import { Mail, Building2, Users, User } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
@@ -116,6 +116,11 @@ export function InvitacionesTab({
     [filtered]
   );
 
+  const estadoColorMap = useMemo(
+    () => buildColorMap([...new Set(data.map((r) => r.Estado_Label))]),
+    [data]
+  );
+
   // Funnel por grupo
   const funnelData = useMemo(() => {
     const grupoMap = new Map<string, number>();
@@ -181,7 +186,7 @@ export function InvitacionesTab({
         onRefresh={onRefresh}
       />
 
-      <div className="p-6 space-y-6">
+      <div className="p-8 space-y-8 max-w-screen-2xl mx-auto">
         {/* KPIs */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <KpiCard
@@ -212,7 +217,7 @@ export function InvitacionesTab({
         </div>
 
         {/* Evolutivo */}
-        <Card className="border-0 shadow-sm">
+        <Card className="border border-slate-100 shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.03)] rounded-2xl">
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold text-slate-800">
               Evolutivo de Invitaciones por Estado
@@ -223,13 +228,14 @@ export function InvitacionesTab({
               data={evolutivoData}
               entities={estadosInData}
               height={340}
+              colorMap={estadoColorMap}
             />
           </CardContent>
         </Card>
 
         {/* Funnel + Donut */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card className="border-0 shadow-sm">
+          <Card className="border border-slate-100 shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.03)] rounded-2xl">
             <CardHeader className="pb-2">
               <CardTitle className="text-base font-semibold text-slate-800">
                 Embudo de Conversión
@@ -240,7 +246,7 @@ export function InvitacionesTab({
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-sm">
+          <Card className="border border-slate-100 shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.03)] rounded-2xl">
             <CardHeader className="pb-2">
               <CardTitle className="text-base font-semibold text-slate-800">
                 Distribución por Estado
@@ -253,7 +259,7 @@ export function InvitacionesTab({
         </div>
 
         {/* Ranking */}
-        <Card className="border-0 shadow-sm">
+        <Card className="border border-slate-100 shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.03)] rounded-2xl">
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold text-slate-800">
               Top Promotores por Invitaciones
@@ -269,7 +275,7 @@ export function InvitacionesTab({
         </Card>
 
         {/* Table */}
-        <Card className="border-0 shadow-sm">
+        <Card className="border border-slate-100 shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.03)] rounded-2xl">
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold text-slate-800">
               Detalle

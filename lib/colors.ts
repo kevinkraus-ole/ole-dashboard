@@ -35,6 +35,36 @@ export function getEntityColor(name: string): string {
   return colorCache.get(name)!;
 }
 
+// Maximally perceptually distinct palette for entities
+const DISTINCT_PALETTE = [
+  "#6366f1", // indigo
+  "#f59e0b", // amber
+  "#10b981", // emerald
+  "#ef4444", // red
+  "#06b6d4", // cyan
+  "#f97316", // orange
+  "#8b5cf6", // violet
+  "#ec4899", // pink
+  "#14b8a6", // teal
+  "#84cc16", // lime
+  "#0ea5e9", // sky
+  "#a855f7", // purple
+];
+
+/**
+ * Assigns maximally distinct colors to a list of entities by sorted order.
+ * Guarantees no two entities share the same color (up to palette size).
+ * Always pass the FULL unfiltered entity list so colors stay stable across filters.
+ */
+export function buildColorMap(entities: string[]): Record<string, string> {
+  const unique = [...new Set(entities)].sort();
+  const map: Record<string, string> = {};
+  unique.forEach((entity, i) => {
+    map[entity] = DISTINCT_PALETTE[i % DISTINCT_PALETTE.length];
+  });
+  return map;
+}
+
 // ─── Status colors ────────────────────────────────────────────────────────────
 /** Maps Spanish status labels to hex colors. */
 export const STATUS_COLORS: Record<string, string> = {
