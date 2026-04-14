@@ -43,3 +43,19 @@ export interface FilterState {
   promotor: string;
   agente: string;
 }
+
+// ─── Internacional (offshore) ──────────────────────────────────────────────
+
+export interface IntlCotizacionRow {
+  Mes: string;
+  Agencia_Master: string;
+  Nivel2: string;
+  Nivel3: string;
+  Etapa: string; // SALES_FUNNEL_STAGE as string
+  Cantidad_Cotizaciones: number;
+}
+
+export interface IntlFunnelRow {
+  Codigo: number;
+  Cantidad: number;
+}
