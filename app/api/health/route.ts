@@ -27,7 +27,8 @@ export async function GET() {
   // 3. Try a simple BigQuery query
   try {
     const { BigQuery } = await import("@google-cloud/bigquery");
-    const bq = new BigQuery({ projectId, credentials });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const bq = new BigQuery({ projectId, credentials: credentials as any });
     const [rows] = await bq.query({
       query: "SELECT 1 AS ok",
       location: "US",
