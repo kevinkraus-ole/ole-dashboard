@@ -46,6 +46,6 @@ function serializeRow(row: Record<string, any>): Record<string, unknown> {
 
 export async function runQuery<T>(sql: string): Promise<T[]> {
   const bq = getClient();
-  const [rows] = await bq.query({ query: sql, location: "US" });
+  const [rows] = await bq.query({ query: sql, location: "us-central1" });
   return rows.map(serializeRow) as T[];
 }
