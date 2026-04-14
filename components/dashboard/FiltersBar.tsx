@@ -34,9 +34,9 @@ function FilterSelect({
       <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
         {label}
       </span>
-      <Select value={value || ALL} onValueChange={(v) => onChange(v ?? "")} disabled={disabled}>
+      <Select value={value} onValueChange={(v) => onChange(v === ALL ? "" : (v ?? ""))} disabled={disabled}>
         <SelectTrigger className="h-8 w-52 text-sm bg-white border-slate-200 text-slate-700 focus:ring-indigo-500">
-          <SelectValue />
+          <SelectValue placeholder="Todas" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value={ALL} className="text-slate-500 italic">Todas</SelectItem>

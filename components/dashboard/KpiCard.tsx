@@ -33,7 +33,7 @@ export function KpiCard({ title, value, subtitle, icon: Icon, color = "slate", c
 
       <div className="flex-1 px-5 py-4 flex items-start justify-between gap-3 min-w-0">
         <div className="min-w-0">
-          <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest truncate">
+          <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest leading-tight">
             {title}
           </p>
           <p className="text-[28px] font-bold text-slate-800 leading-tight mt-1 tabular-nums">

@@ -105,9 +105,10 @@ export function FunnelesTab({
 
         <div className="flex flex-col gap-1">
           <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Agencia Master</span>
-          <Select value={agenciaFilter || ALL} onValueChange={(v) => setAgenciaFilter(!v || v === ALL ? "" : v)}>
+          <Select value={agenciaFilter} onValueChange={(v) => setAgenciaFilter(v === ALL ? "" : (v ?? ""))}>
+
             <SelectTrigger className="h-8 w-52 text-sm bg-white border-slate-200 text-slate-700">
-              <SelectValue />
+              <SelectValue placeholder="Todas" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value={ALL} className="text-slate-500 italic">Todas</SelectItem>
