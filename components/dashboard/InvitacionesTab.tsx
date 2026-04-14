@@ -188,26 +188,26 @@ export function InvitacionesTab({
             title="Invitaciones totales"
             value={totalInv}
             icon={Mail}
-            color="blue"
+            color="indigo"
           />
           <KpiCard
             title="Tasa de aprobación"
             value={`${tasaAprobacion}%`}
             subtitle={`${completadas} completadas`}
             icon={User}
-            color="green"
+            color="emerald"
           />
           <KpiCard
             title="Agencias Master"
             value={totalAgencias}
             icon={Building2}
-            color="default"
+            color="slate"
           />
           <KpiCard
             title="Promotores"
             value={totalPromotores}
             icon={Users}
-            color="default"
+            color="slate"
           />
         </div>
 

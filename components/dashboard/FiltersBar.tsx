@@ -1,19 +1,15 @@
 "use client";
 
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { FilterState } from "@/lib/types";
-import { RefreshCw, X } from "lucide-react";
+import { RefreshCw, X, SlidersHorizontal } from "lucide-react";
 
 interface FiltersBarProps {
   filters: FilterState;
-  onFilterChange: (filters: FilterState) => void;
+  onFilterChange: (f: FilterState) => void;
   agencias: string[];
   promotores: string[];
   agentes: string[];
@@ -24,105 +20,88 @@ interface FiltersBarProps {
 
 const ALL = "__ALL__";
 
+function FilterSelect({
+  label, value, options, disabled, onChange,
+}: {
+  label: string;
+  value: string;
+  options: string[];
+  disabled?: boolean;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-1 min-w-0">
+      <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
+        {label}
+      </span>
+      <Select value={value || ALL} onValueChange={(v) => onChange(v ?? "")} disabled={disabled}>
+        <SelectTrigger className="h-8 w-52 text-sm bg-white border-slate-200 text-slate-700 focus:ring-indigo-500">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={ALL} className="text-slate-500 italic">Todas</SelectItem>
+          {options.map((o) => (
+            <SelectItem key={o} value={o}>{o}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
+
 export function FiltersBar({
-  filters,
-  onFilterChange,
-  agencias,
-  promotores,
-  agentes,
-  lastUpdated,
-  isLoading,
-  onRefresh,
+  filters, onFilterChange, agencias, promotores, agentes,
+  lastUpdated, isLoading, onRefresh,
 }: FiltersBarProps) {
   const set = (key: keyof FilterState, val: string | null) => {
     const next: FilterState = { ...filters, [key]: !val || val === ALL ? "" : val };
-    // cascade reset
-    if (key === "agenciaMaster") next.promotor = "";
+    if (key === "agenciaMaster") { next.promotor = ""; next.agente = ""; }
     if (key === "promotor") next.agente = "";
     onFilterChange(next);
   };
 
-  const hasFilters = filters.agenciaMaster || filters.promotor || filters.agente;
+  const hasFilters = Boolean(filters.agenciaMaster || filters.promotor || filters.agente);
+  const activeCount = [filters.agenciaMaster, filters.promotor, filters.agente].filter(Boolean).length;
 
   return (
-    <div className="flex flex-wrap items-center gap-3 py-3 px-4 bg-white border-b border-slate-100">
-      {/* Agencia Master */}
-      <div className="flex flex-col gap-0.5">
-        <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wide">
-          Agencia Master
-        </span>
-        <Select
-          value={filters.agenciaMaster || ALL}
-          onValueChange={(v) => set("agenciaMaster", v)}
-        >
-          <SelectTrigger className="h-8 w-52 text-sm">
-            <SelectValue placeholder="Todas" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL}>Todas</SelectItem>
-            {agencias.map((a) => (
-              <SelectItem key={a} value={a}>
-                {a}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+    <div className="bg-white border-b border-slate-200 px-6 py-3 flex flex-wrap items-end gap-4">
+      {/* Filter icon + label */}
+      <div className="flex items-center gap-1.5 text-slate-400 self-end pb-1.5">
+        <SlidersHorizontal size={13} />
+        <span className="text-xs font-medium">Filtros</span>
+        {activeCount > 0 && (
+          <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-indigo-500 text-white text-[9px] font-bold">
+            {activeCount}
+          </span>
+        )}
       </div>
 
-      {/* Promotor */}
-      <div className="flex flex-col gap-0.5">
-        <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wide">
-          Promotor
-        </span>
-        <Select
-          value={filters.promotor || ALL}
-          onValueChange={(v) => set("promotor", v)}
-          disabled={!filters.agenciaMaster}
-        >
-          <SelectTrigger className="h-8 w-52 text-sm">
-            <SelectValue placeholder="Todos" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL}>Todos</SelectItem>
-            {promotores.map((p) => (
-              <SelectItem key={p} value={p}>
-                {p}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <FilterSelect
+        label="Agencia Master"
+        value={filters.agenciaMaster}
+        options={agencias}
+        onChange={(v) => set("agenciaMaster", v)}
+      />
+      <FilterSelect
+        label="Promotor"
+        value={filters.promotor}
+        options={promotores}
+        disabled={!filters.agenciaMaster}
+        onChange={(v) => set("promotor", v)}
+      />
+      <FilterSelect
+        label="Agente"
+        value={filters.agente}
+        options={agentes}
+        disabled={!filters.promotor}
+        onChange={(v) => set("agente", v)}
+      />
 
-      {/* Agente */}
-      <div className="flex flex-col gap-0.5">
-        <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wide">
-          Agente
-        </span>
-        <Select
-          value={filters.agente || ALL}
-          onValueChange={(v) => set("agente", v)}
-          disabled={!filters.promotor}
-        >
-          <SelectTrigger className="h-8 w-48 text-sm">
-            <SelectValue placeholder="Todos" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL}>Todos</SelectItem>
-            {agentes.map((a) => (
-              <SelectItem key={a} value={a}>
-                {a}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Clear filters */}
       {hasFilters && (
         <Button
           variant="ghost"
           size="sm"
-          className="h-8 mt-4 text-slate-500"
+          className="h-8 self-end text-slate-400 hover:text-slate-600 px-2"
           onClick={() => onFilterChange({ agenciaMaster: "", promotor: "", agente: "" })}
         >
           <X size={13} className="mr-1" />
@@ -133,27 +112,24 @@ export function FiltersBar({
       {/* Spacer */}
       <div className="flex-1" />
 
-      {/* Last updated + Refresh */}
-      <div className="flex items-center gap-3 mt-3 sm:mt-0">
+      {/* Timestamp + refresh */}
+      <div className="flex items-end gap-3 self-end">
         {lastUpdated && (
-          <span className="text-[11px] text-slate-400">
-            Actualizado:{" "}
+          <span className="text-[11px] text-slate-400 pb-1.5">
+            Act.{" "}
             {new Date(lastUpdated).toLocaleString("es-MX", {
-              day: "2-digit",
-              month: "short",
-              hour: "2-digit",
-              minute: "2-digit",
+              day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit",
             })}
           </span>
         )}
         <Button
           size="sm"
           variant="outline"
-          className="h-8 gap-1.5"
+          className="h-8 gap-1.5 text-sm border-slate-200 text-slate-600 hover:bg-slate-50"
           onClick={onRefresh}
           disabled={isLoading}
         >
-          <RefreshCw size={13} className={isLoading ? "animate-spin" : ""} />
+          <RefreshCw size={12} className={isLoading ? "animate-spin" : ""} />
           Actualizar
         </Button>
       </div>

@@ -212,13 +212,13 @@ export function PolizasTab({
             title="Pólizas emitidas"
             value={totalPolizas}
             icon={ShieldCheck}
-            color="green"
+            color="emerald"
           />
           <KpiCard
             title="Prima Total Anual"
             value={formatPeso(totalPrima)}
             icon={DollarSign}
-            color="blue"
+            color="indigo"
           />
           <KpiCard
             title="Suma Asegurada"
@@ -230,7 +230,7 @@ export function PolizasTab({
             title="Agencias Master"
             value={totalAgencias}
             icon={Building2}
-            color="default"
+            color="slate"
           />
         </div>
 

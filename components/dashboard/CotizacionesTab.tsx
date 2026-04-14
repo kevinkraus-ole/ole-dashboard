@@ -184,25 +184,25 @@ export function CotizacionesTab({
             title="Cotizaciones totales"
             value={totalCotizaciones}
             icon={FileText}
-            color="blue"
+            color="indigo"
           />
           <KpiCard
             title="Agencias Master"
             value={totalAgencias}
             icon={Building2}
-            color="default"
+            color="slate"
           />
           <KpiCard
             title="Promotores"
             value={totalPromotores}
             icon={Users}
-            color="default"
+            color="slate"
           />
           <KpiCard
             title="Agentes activos"
             value={totalAgentes}
             icon={User}
-            color="default"
+            color="slate"
           />
         </div>
 
