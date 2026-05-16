@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@/utils/supabase/server";
+import { getValidGoogleAccessToken } from "@/lib/google-token";
 import { runQuery } from "@/lib/bigquery";
 import { CotizacionRow } from "@/lib/types";
 
@@ -22,8 +24,13 @@ ORDER BY Mes DESC
 `;
 
 export async function GET() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return new Response("Unauthorized", { status: 401 });
+
   try {
-    const data = await runQuery<CotizacionRow>(SQL);
+    const accessToken = await getValidGoogleAccessToken(user.id);
+    const data = await runQuery<CotizacionRow>(SQL, accessToken);
     return NextResponse.json({ data, lastUpdated: new Date().toISOString() });
   } catch (err) {
     console.error("[api/br/cotizaciones]", err);

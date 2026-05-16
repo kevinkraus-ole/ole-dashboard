@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { createClient } from "@/utils/supabase/server";
+import { SignOutButton } from "@/components/sign-out-button";
 import "./globals.css";
 
 const inter = Inter({
@@ -14,13 +16,15 @@ export const metadata: Metadata = {
   description: "Cotizaciones, invitaciones y pólizas por agencia",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
   return (
     <html lang="es" className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-[#f7f8fa]">
-        {/* ── Top navigation bar ── */}
         <header className="h-14 bg-white border-b border-slate-100 flex items-center px-8 shrink-0 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
           <div className="flex items-center gap-3">
             <div
@@ -41,9 +45,19 @@ export default function RootLayout({
 
           <div className="flex-1" />
 
-          <span className="text-xs text-slate-400 font-mono bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-100">
-            olelifetech · gold_zone
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-slate-400 font-mono bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-100">
+              olelifetech · gold_zone
+            </span>
+            {user && (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-slate-600 hidden sm:block">
+                  {user.email}
+                </span>
+                <SignOutButton />
+              </div>
+            )}
+          </div>
         </header>
 
         <main className="flex-1 flex flex-col">{children}</main>

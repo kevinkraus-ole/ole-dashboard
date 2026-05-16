@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@/utils/supabase/server";
+import { getValidGoogleAccessToken } from "@/lib/google-token";
 import { runQuery } from "@/lib/bigquery";
 import type { IntlVencimientoRow } from "@/lib/types";
 
-// Active policies whose NEXT_RENEWAL falls in the next 90 days.
-// One row per policy (deduped by NUMBER). Sorted by renewal date ascending.
 const SQL = `
 WITH deduped AS (
   SELECT
@@ -20,46 +20,34 @@ WITH deduped AS (
     NEXT_RENEWAL                                                     AS Fecha_Vencimiento,
     COALESCE(POLICY_PERIOD_YEAR, 0)                                  AS Anos_Poliza,
     DATE_DIFF(NEXT_RENEWAL, CURRENT_DATE(), DAY)                     AS Dias_Para_Vencer,
-    ROW_NUMBER() OVER (
-      PARTITION BY NUMBER
-      ORDER BY DATE_CHANGE DESC, UPDATED DESC
-    ) AS rn
+    ROW_NUMBER() OVER (PARTITION BY NUMBER ORDER BY DATE_CHANGE DESC, UPDATED DESC) AS rn
   FROM \`olelifetech.gold_zone.fact_quotation_policies\`
   WHERE STATUS_QUOTE = 'ACTIVE'
     AND NUMBER IS NOT NULL
     AND NEXT_RENEWAL BETWEEN CURRENT_DATE() AND DATE_ADD(CURRENT_DATE(), INTERVAL 90 DAY)
 )
 SELECT
-  NUMBER                AS Numero,
-  Asegurado,
-  Asesor,
-  Agencia_Master,
-  Nivel2,
-  Nivel3,
-  Estado_Pago,
-  ROUND(Prima_Anual, 2) AS Prima_Anual,
-  ROUND(Suma_Asegurada, 2) AS Suma_Asegurada,
-  CAST(Fecha_Inicio AS STRING)      AS Fecha_Inicio,
-  CAST(Fecha_Vencimiento AS STRING) AS Fecha_Vencimiento,
-  Anos_Poliza,
-  Dias_Para_Vencer
-FROM deduped
-WHERE rn = 1
+  NUMBER AS Numero, Asegurado, Asesor, Agencia_Master, Nivel2, Nivel3,
+  Estado_Pago, ROUND(Prima_Anual, 2) AS Prima_Anual, ROUND(Suma_Asegurada, 2) AS Suma_Asegurada,
+  CAST(Fecha_Inicio AS STRING) AS Fecha_Inicio, CAST(Fecha_Vencimiento AS STRING) AS Fecha_Vencimiento,
+  Anos_Poliza, Dias_Para_Vencer
+FROM deduped WHERE rn = 1
 ORDER BY Fecha_Vencimiento ASC
 `;
 
 export interface VencimientoSummary {
-  total: number;
-  pagadas: number;
-  no_pagadas: number;
-  prima_en_riesgo: number;
-  suma_asegurada_en_riesgo: number;
+  total: number; pagadas: number; no_pagadas: number;
+  prima_en_riesgo: number; suma_asegurada_en_riesgo: number;
 }
 
 export async function GET() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return new Response("Unauthorized", { status: 401 });
+
   try {
-    const rows = await runQuery<IntlVencimientoRow>(SQL);
-    // Compute summary on the server so the client doesn't have to re-aggregate
+    const accessToken = await getValidGoogleAccessToken(user.id);
+    const rows = await runQuery<IntlVencimientoRow>(SQL, accessToken);
     const summary: VencimientoSummary = {
       total: rows.length,
       pagadas: rows.filter((r) => r.Estado_Pago === "PAID").length,

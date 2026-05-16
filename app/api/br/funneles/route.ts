@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@/utils/supabase/server";
+import { getValidGoogleAccessToken } from "@/lib/google-token";
 import { runQuery } from "@/lib/bigquery";
 import type { AgenteFunnelRow, CotizacionFunnelRow } from "@/app/api/funneles/route";
 
-// Brasil doesn't have vw_agents_request, so agentes returns a single empty placeholder row.
 const SQL_AGENTES = `
 SELECT
   'Total'                                                             AS Agencia_Master,
@@ -34,16 +35,17 @@ ORDER BY cotizaciones_totales DESC
 `;
 
 export async function GET() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return new Response("Unauthorized", { status: 401 });
+
   try {
+    const accessToken = await getValidGoogleAccessToken(user.id);
     const [agentes, cotizaciones] = await Promise.all([
-      runQuery<AgenteFunnelRow>(SQL_AGENTES),
-      runQuery<CotizacionFunnelRow>(SQL_COTIZACIONES),
+      runQuery<AgenteFunnelRow>(SQL_AGENTES, accessToken),
+      runQuery<CotizacionFunnelRow>(SQL_COTIZACIONES, accessToken),
     ]);
-    return NextResponse.json({
-      agentes,
-      cotizaciones,
-      lastUpdated: new Date().toISOString(),
-    });
+    return NextResponse.json({ agentes, cotizaciones, lastUpdated: new Date().toISOString() });
   } catch (err) {
     console.error("[api/br/funneles]", err);
     return NextResponse.json(

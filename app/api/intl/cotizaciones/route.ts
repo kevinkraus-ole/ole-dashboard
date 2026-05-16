@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@/utils/supabase/server";
+import { getValidGoogleAccessToken } from "@/lib/google-token";
 import { runQuery } from "@/lib/bigquery";
 import type { IntlCotizacionRow } from "@/lib/types";
 
-// fact_quotation_policies: MASTER_AGENCY, LEVEL_2..LEVEL_7, QUOTE_NRO,
-// SALES_FUNNEL_STAGE (numeric), OFFER_DATE — last 12 months only.
 const SQL = `
 SELECT
   DATE_TRUNC(DATE(p.OFFER_DATE), MONTH)                              AS Mes,
@@ -20,8 +20,13 @@ ORDER BY Mes DESC
 `;
 
 export async function GET() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return new Response("Unauthorized", { status: 401 });
+
   try {
-    const data = await runQuery<IntlCotizacionRow>(SQL);
+    const accessToken = await getValidGoogleAccessToken(user.id);
+    const data = await runQuery<IntlCotizacionRow>(SQL, accessToken);
     return NextResponse.json({ data, lastUpdated: new Date().toISOString() });
   } catch (err) {
     console.error("[api/intl/cotizaciones]", err);

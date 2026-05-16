@@ -1,10 +1,8 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@/utils/supabase/server";
+import { getValidGoogleAccessToken } from "@/lib/google-token";
 import { runQuery } from "@/lib/bigquery";
 
-// ─── Funnel de Agentes ──────────────────────────────────────────────────────
-// Invitados → Aprobados → Con cotizaciones → Con ventas (pólizas)
-// Single totals row — join by agency_name is unreliable since agency_name in
-// fact_onshore_mx_quotation_policies contains promoter names, not formal agency names.
 const SQL_AGENTES = `
 SELECT
   'Total'                                                           AS Agencia_Master,
@@ -21,8 +19,6 @@ SELECT
 FROM \`olelifetech.gold_zone.vw_agents_request\`
 `;
 
-// ─── Funnel de Cotizaciones ─────────────────────────────────────────────────
-// Cotizaciones totales → únicas → en progreso (solicitud) → convertidas → pólizas vigentes
 const SQL_COTIZACIONES = `
 SELECT
   COALESCE(NULLIF(TRIM(agency_name),''), 'Sin promotor')                    AS Agencia_Master,
@@ -55,16 +51,17 @@ export interface CotizacionFunnelRow {
 }
 
 export async function GET() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return new Response("Unauthorized", { status: 401 });
+
   try {
+    const accessToken = await getValidGoogleAccessToken(user.id);
     const [agentes, cotizaciones] = await Promise.all([
-      runQuery<AgenteFunnelRow>(SQL_AGENTES),
-      runQuery<CotizacionFunnelRow>(SQL_COTIZACIONES),
+      runQuery<AgenteFunnelRow>(SQL_AGENTES, accessToken),
+      runQuery<CotizacionFunnelRow>(SQL_COTIZACIONES, accessToken),
     ]);
-    return NextResponse.json({
-      agentes,
-      cotizaciones,
-      lastUpdated: new Date().toISOString(),
-    });
+    return NextResponse.json({ agentes, cotizaciones, lastUpdated: new Date().toISOString() });
   } catch (err) {
     console.error("[api/funneles]", err);
     return NextResponse.json(

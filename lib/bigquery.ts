@@ -1,33 +1,5 @@
 import { BigQuery } from "@google-cloud/bigquery";
-import { GoogleAuth } from "google-auth-library";
-
-let client: BigQuery | null = null;
-
-function getClient(): BigQuery {
-  if (client) return client;
-
-  const credJson = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
-  if (!credJson) {
-    throw new Error("Missing GOOGLE_SERVICE_ACCOUNT_JSON env variable");
-  }
-
-  const credentials = JSON.parse(credJson);
-
-  // GoogleAuth handles both service_account and authorized_user types
-  const auth = new GoogleAuth({
-    credentials,
-    scopes: ["https://www.googleapis.com/auth/bigquery"],
-    projectId: process.env.BIGQUERY_PROJECT_ID ?? "olelifetech",
-  });
-
-  client = new BigQuery({
-    projectId: process.env.BIGQUERY_PROJECT_ID ?? "olelifetech",
-    authClient: auth,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } as any);
-
-  return client;
-}
+import { OAuth2Client } from "google-auth-library";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function serializeValue(val: any): unknown {
@@ -44,8 +16,16 @@ function serializeRow(row: Record<string, any>): Record<string, unknown> {
   );
 }
 
-export async function runQuery<T>(sql: string): Promise<T[]> {
-  const bq = getClient();
+export async function runQuery<T>(sql: string, accessToken: string): Promise<T[]> {
+  const oauthClient = new OAuth2Client();
+  oauthClient.setCredentials({ access_token: accessToken });
+
+  const bq = new BigQuery({
+    projectId: process.env.BIGQUERY_PROJECT_ID ?? "olelifetech",
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    authClient: oauthClient as any,
+  });
+
   const [rows] = await bq.query({ query: sql, location: "us-central1" });
   return rows.map(serializeRow) as T[];
 }
